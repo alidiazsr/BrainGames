@@ -638,8 +638,18 @@
         function showQuestion(index) {
             if (!currentQuiz || index >= currentQuiz.questions.length) return;
             
+            // Limpiar cualquier temporizador anterior
+            if (questionTimer) {
+                clearInterval(questionTimer);
+                questionTimer = null;
+            }
+            
             const question = currentQuiz.questions[index];
             currentQuestionIndex = index;
+            
+            // Restablecer estado visual
+            document.getElementById('timer').style.color = '#2563eb';
+            document.getElementById('timer').textContent = question.timeLimit;
             
             document.getElementById('currentQuestion').textContent = 
                 `Pregunta ${index + 1}: ${question.question}`;
@@ -656,16 +666,31 @@
                 }
                 optionsContainer.appendChild(optionDiv);
             });
-            
-            document.getElementById('timer').textContent = question.timeLimit;
         }
 
         window.startQuestion = function() {
             if (!currentQuiz) return;
             
+            // Verificar si ya hay un temporizador corriendo
+            if (questionTimer) {
+                clearInterval(questionTimer);
+                questionTimer = null;
+            }
+            
+            // Verificar que hay estudiantes conectados
+            if (Object.keys(students).length === 0) {
+                alert('⚠️ No hay estudiantes conectados\n\nEspera a que se conecten estudiantes antes de iniciar la pregunta.');
+                return;
+            }
+            
             const question = currentQuiz.questions[currentQuestionIndex];
             questionStartTime = Date.now();
             studentAnswers = {};
+            gameState = 'question';
+            
+            // Cambiar controles inmediatamente
+            document.getElementById('startQuestionBtn').classList.add('hidden');
+            document.getElementById('timer').style.color = '#ef4444';
             
             // Notificar inicio de pregunta a estudiantes
             updateGameState('question_started', {
@@ -687,15 +712,20 @@
                 }
             }, 1000);
             
-            // Cambiar controles
-            document.getElementById('startQuestionBtn').classList.add('hidden');
-            document.getElementById('timer').style.color = '#ef4444';
-            
-            gameState = 'question';
+            console.log(`⏱️ Pregunta ${currentQuestionIndex + 1} iniciada - ${timeLeft}s`);
         };
 
         function endQuestion() {
-            clearInterval(questionTimer);
+            // Limpiar temporizador completamente
+            if (questionTimer) {
+                clearInterval(questionTimer);
+                questionTimer = null;
+            }
+            
+            gameState = 'results';
+            
+            // Restablecer color del timer
+            document.getElementById('timer').style.color = '#6b7280';
             
             // Notificar fin de pregunta a estudiantes
             updateGameState('question_ended', {
@@ -783,10 +813,22 @@
         }
 
         window.nextQuestion = function() {
+            // Limpiar cualquier temporizador residual
+            if (questionTimer) {
+                clearInterval(questionTimer);
+                questionTimer = null;
+            }
+            
+            // Restablecer interfaz
             document.getElementById('rankingSection').classList.add('hidden');
             document.getElementById('nextQuestionBtn').classList.add('hidden');
             document.getElementById('startQuestionBtn').classList.remove('hidden');
             
+            // Restablecer estado del juego
+            gameState = 'waiting';
+            studentAnswers = {};
+            
+            // Avanzar a la siguiente pregunta
             currentQuestionIndex++;
             showQuestion(currentQuestionIndex);
             
@@ -795,6 +837,8 @@
                 questionIndex: currentQuestionIndex,
                 question: currentQuiz.questions[currentQuestionIndex]
             });
+            
+            console.log(`➡️ Preparando pregunta ${currentQuestionIndex + 1}`);
         };
 
         window.showFinalResults = function() {
