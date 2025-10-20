@@ -474,16 +474,23 @@
                 teacher: 'profesor'
             });
 
-            // Escuchar estudiantes que se unen
+            // Escuchar estudiantes que se unen (con protección contra interferencias)
             onValue(studentsRef, (snapshot) => {
                 const studentsData = snapshot.val();
-                console.log('Estudiantes actualizados:', studentsData);
+                console.log('📡 Estudiantes actualizados:', studentsData);
+                
+                // Verificar que no interfiera con preguntas en curso
+                if (gameState === 'question' && questionTimer) {
+                    console.log('🔒 Pregunta en curso - Actualizando solo datos internos');
+                }
                 
                 if (studentsData) {
                     updateStudentsList(studentsData);
                 } else {
-                    // No hay estudiantes conectados
-                    resetStudentsList();
+                    // Solo resetear si no hay pregunta en curso
+                    if (gameState !== 'question') {
+                        resetStudentsList();
+                    }
                 }
             });
 
@@ -492,6 +499,14 @@
 
         // Actualizar lista de estudiantes en la interfaz
         function updateStudentsList(studentsData) {
+            // Si hay una pregunta en curso, no actualizar la interfaz para no interrumpir
+            if (gameState === 'question' && questionTimer) {
+                // Solo actualizar los datos internos, no la interfaz visual
+                students = studentsData;
+                console.log('📊 Datos de estudiantes actualizados (pregunta en curso)');
+                return;
+            }
+            
             const studentsList = document.getElementById('studentsList');
             studentsList.innerHTML = '';
             
@@ -512,11 +527,13 @@
             
             document.getElementById('studentCount').textContent = studentCount;
             
-            // Mostrar controles de juego si hay estudiantes
-            if (studentCount > 0 && currentQuiz) {
-                document.getElementById('gameControls').classList.remove('hidden');
-            } else {
-                document.getElementById('gameControls').classList.add('hidden');
+            // Solo mostrar controles si no hay pregunta en curso
+            if (gameState !== 'question') {
+                if (studentCount > 0 && currentQuiz) {
+                    document.getElementById('gameControls').classList.remove('hidden');
+                } else {
+                    document.getElementById('gameControls').classList.add('hidden');
+                }
             }
         }
 
@@ -699,11 +716,18 @@
                 startTime: questionStartTime
             });
             
-            // Iniciar temporizador
+            // Iniciar temporizador con protección contra interferencias
             let timeLeft = question.timeLimit;
             document.getElementById('timer').textContent = timeLeft;
             
             questionTimer = setInterval(() => {
+                // Verificar que el temporizador sigue siendo válido
+                if (gameState !== 'question') {
+                    clearInterval(questionTimer);
+                    questionTimer = null;
+                    return;
+                }
+                
                 timeLeft--;
                 document.getElementById('timer').textContent = timeLeft;
                 
@@ -712,7 +736,7 @@
                 }
             }, 1000);
             
-            console.log(`⏱️ Pregunta ${currentQuestionIndex + 1} iniciada - ${timeLeft}s`);
+            console.log(`⏱️ Pregunta ${currentQuestionIndex + 1} iniciada - ${question.timeLimit}s`);
         };
 
         function endQuestion() {
@@ -723,9 +747,18 @@
             }
             
             gameState = 'results';
+            console.log(`⏰ Pregunta ${currentQuestionIndex + 1} terminada - Tiempo agotado`);
             
             // Restablecer color del timer
             document.getElementById('timer').style.color = '#6b7280';
+            
+            // Permitir actualizaciones de interfaz nuevamente
+            setTimeout(() => {
+                // Actualizar lista de estudiantes después de terminar pregunta
+                if (students && Object.keys(students).length > 0) {
+                    updateStudentsList(students);
+                }
+            }, 100);
             
             // Notificar fin de pregunta a estudiantes
             updateGameState('question_ended', {
