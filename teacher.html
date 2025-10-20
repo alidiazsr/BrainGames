@@ -431,19 +431,97 @@
             appId: "1:127450849239:web:9749f4d3fbe51c6f907592"
         };
 
-        // Variables globales
+        // Variables globales del juego
         let app = null;
         let database = null;
         let currentQuiz = null;
         let currentQuestionIndex = 0;
         let roomCode = null;
         let students = {};
-        let gameState = 'waiting';
-        let questionTimer = null;
-        let questionStartTime = null;
-        let studentAnswers = {};
         let roomRef = null;
         let studentsRef = null;
+
+        // Sistema de control de juego
+        let gameController = {
+            state: 'WAITING',           // WAITING, GAME_READY, QUESTION_ACTIVE, QUESTION_ENDED, GAME_FINISHED
+            timer: null,
+            timeLeft: 0,
+            questionStartTime: null,
+            
+            // Estados válidos
+            STATES: {
+                WAITING: 'WAITING',
+                GAME_READY: 'GAME_READY', 
+                QUESTION_ACTIVE: 'QUESTION_ACTIVE',
+                QUESTION_ENDED: 'QUESTION_ENDED',
+                GAME_FINISHED: 'GAME_FINISHED'
+            },
+
+            // Cambiar estado de forma segura
+            setState: function(newState) {
+                console.log(`🎮 Estado: ${this.state} → ${newState}`);
+                this.state = newState;
+                this.updateUI();
+            },
+
+            // Limpiar temporizador
+            clearTimer: function() {
+                if (this.timer) {
+                    clearInterval(this.timer);
+                    this.timer = null;
+                    console.log('⏱️ Temporizador limpiado');
+                }
+            },
+
+            // Actualizar interfaz según estado
+            updateUI: function() {
+                const startGameBtn = document.getElementById('gameControls');
+                const startQuestionBtn = document.getElementById('startQuestionBtn');
+                const nextBtn = document.getElementById('nextQuestionBtn');
+                const finishBtn = document.getElementById('showResultsBtn');
+                const rankingSection = document.getElementById('rankingSection');
+
+                // Ocultar todo primero
+                if (startGameBtn) startGameBtn.classList.add('hidden');
+                if (startQuestionBtn) startQuestionBtn.classList.add('hidden');
+                if (nextBtn) nextBtn.classList.add('hidden'); 
+                if (finishBtn) finishBtn.classList.add('hidden');
+                if (rankingSection) rankingSection.classList.add('hidden');
+
+                // Mostrar según estado
+                switch(this.state) {
+                    case this.STATES.WAITING:
+                        if (Object.keys(students).length > 0 && currentQuiz) {
+                            startGameBtn?.classList.remove('hidden');
+                        }
+                        break;
+                    case this.STATES.GAME_READY:
+                        startQuestionBtn?.classList.remove('hidden');
+                        break;
+                    case this.STATES.QUESTION_ENDED:
+                        rankingSection?.classList.remove('hidden');
+                        if (currentQuestionIndex < currentQuiz.questions.length - 1) {
+                            nextBtn?.classList.remove('hidden');
+                        } else {
+                            finishBtn?.classList.remove('hidden');
+                        }
+                        break;
+                }
+            },
+
+            // Verificar si se puede ejecutar una acción
+            canExecute: function(action) {
+                const validTransitions = {
+                    'START_GAME': [this.STATES.WAITING],
+                    'START_QUESTION': [this.STATES.GAME_READY],
+                    'END_QUESTION': [this.STATES.QUESTION_ACTIVE],
+                    'NEXT_QUESTION': [this.STATES.QUESTION_ENDED],
+                    'FINISH_GAME': [this.STATES.QUESTION_ENDED]
+                };
+
+                return validTransitions[action]?.includes(this.state);
+            }
+        };
 
         // Inicializar Firebase y comunicación
         function initializeFirebase() {
@@ -686,79 +764,95 @@
         }
 
         window.startQuestion = function() {
-            console.log('🎯 Iniciando pregunta...', { gameState, questionTimer: !!questionTimer });
+            console.log('❓ Intentando iniciar pregunta...');
             
+            if (!gameController.canExecute('START_QUESTION')) {
+                alert(`❌ No se puede iniciar pregunta en estado: ${gameController.state}`);
+                return;
+            }
+
             if (!currentQuiz) {
                 alert('❌ No hay cuestionario cargado');
                 return;
             }
-            
-            // Limpiar cualquier temporizador anterior de forma segura
-            if (questionTimer) {
-                console.log('🧹 Limpiando temporizador anterior');
-                clearInterval(questionTimer);
-                questionTimer = null;
+
+            if (currentQuestionIndex >= currentQuiz.questions.length) {
+                endQuiz();
+                return;
             }
-            
+
             // Verificar estudiantes conectados
             if (Object.keys(students).length === 0) {
                 alert('⚠️ No hay estudiantes conectados\n\nEspera a que se conecten estudiantes antes de iniciar la pregunta.');
                 return;
             }
-            
+
+            // Limpiar cualquier timer existente de forma segura
+            gameController.clearTimer();
+
             const question = currentQuiz.questions[currentQuestionIndex];
+            const timeLimit = question.timeLimit || 30;
             questionStartTime = Date.now();
             studentAnswers = {};
-            
-            // Cambiar estado DESPUÉS de las verificaciones
-            gameState = 'question';
-            
-            // Cambiar interfaz inmediatamente
-            document.getElementById('startQuestionBtn').classList.add('hidden');
-            document.getElementById('timer').style.color = '#ef4444';
-            
-            console.log(`⏱️ Iniciando temporizador de ${question.timeLimit} segundos`);
-            
+
+            console.log(`🚀 Iniciando pregunta ${currentQuestionIndex + 1}: ${question.question}`);
+
+            // Cambiar estado de forma controlada
+            gameController.setState(gameController.STATES.QUESTION_ACTIVE);
+
             // Notificar a estudiantes
             updateGameState('question_started', {
                 question: question,
                 questionIndex: currentQuestionIndex,
                 startTime: questionStartTime
             });
-            
-            // Iniciar temporizador simple y robusto
-            let timeLeft = question.timeLimit;
+
+            // Actualizar UI del profesor
+            gameController.updateUI();
+
+            // Iniciar timer de forma controlada
+            let timeLeft = timeLimit;
             document.getElementById('timer').textContent = timeLeft;
-            
-            questionTimer = setInterval(() => {
+            document.getElementById('timer').style.color = '#ef4444';
+
+            gameController.questionTimer = setInterval(() => {
+                // Verificar estado antes de continuar
+                if (gameController.state !== gameController.STATES.QUESTION_ACTIVE) {
+                    console.log('⚠️ Timer auto-detenido - estado cambió a:', gameController.state);
+                    gameController.clearTimer();
+                    return;
+                }
+
                 timeLeft--;
                 document.getElementById('timer').textContent = timeLeft;
-                
+
                 console.log(`⏰ Tiempo restante: ${timeLeft}s`);
-                
+
                 if (timeLeft <= 0) {
-                    console.log('⏰ Tiempo agotado - Terminando pregunta');
+                    console.log('⏰ Tiempo agotado para pregunta');
                     endQuestion();
                 }
             }, 1000);
-            
+
             console.log(`✅ Pregunta ${currentQuestionIndex + 1} iniciada correctamente`);
         };
 
         function endQuestion() {
             console.log('🛑 Terminando pregunta...');
             
-            // Limpiar temporizador de forma definitiva
-            if (questionTimer) {
-                clearInterval(questionTimer);
-                questionTimer = null;
-                console.log('🧹 Temporizador limpiado');
+            if (!gameController.canExecute('END_QUESTION')) {
+                console.log('⚠️ No se puede terminar pregunta en estado:', gameController.state);
+                return;
             }
+
+            // Limpiar temporizador de forma controlada
+            gameController.clearTimer();
             
-            // Cambiar estado
-            gameState = 'results';
+            // Cambiar estado de forma controlada
+            gameController.setState(gameController.STATES.QUESTION_ENDED);
             
-            // Restablecer interfaz
+            // Actualizar UI
+            gameController.updateUI();
             document.getElementById('timer').style.color = '#6b7280';
             document.getElementById('timer').textContent = '⏹️';
             
@@ -850,23 +944,32 @@
         }
 
         window.nextQuestion = function() {
-            // Limpiar cualquier temporizador residual
-            if (questionTimer) {
-                clearInterval(questionTimer);
-                questionTimer = null;
+            console.log('➡️ Avanzando a siguiente pregunta...');
+            
+            if (!gameController.canExecute('NEXT_QUESTION')) {
+                alert(`❌ No se puede avanzar en estado: ${gameController.state}`);
+                return;
             }
+
+            // Limpiar cualquier temporizador residual de forma segura
+            gameController.clearTimer();
             
-            // Restablecer interfaz
-            document.getElementById('rankingSection').classList.add('hidden');
-            document.getElementById('nextQuestionBtn').classList.add('hidden');
-            document.getElementById('startQuestionBtn').classList.remove('hidden');
-            
-            // Restablecer estado del juego
-            gameState = 'waiting';
+            // Restablecer datos de la pregunta anterior
             studentAnswers = {};
             
             // Avanzar a la siguiente pregunta
             currentQuestionIndex++;
+            
+            if (currentQuestionIndex >= currentQuiz.questions.length) {
+                endQuiz();
+                return;
+            }
+
+            // Cambiar estado de forma controlada
+            gameController.setState(gameController.STATES.WAITING_FOR_QUESTION);
+            
+            // Actualizar UI
+            gameController.updateUI();
             showQuestion(currentQuestionIndex);
             
             // Notificar nueva pregunta a estudiantes
@@ -874,6 +977,8 @@
                 questionIndex: currentQuestionIndex,
                 question: currentQuiz.questions[currentQuestionIndex]
             });
+
+            console.log(`✅ Avanzado a pregunta ${currentQuestionIndex + 1} de ${currentQuiz.questions.length}`);
             
             console.log(`➡️ Preparando pregunta ${currentQuestionIndex + 1}`);
         };
@@ -937,25 +1042,52 @@
             });
         }
 
+        // Función para terminar el cuestionario
+        function endQuiz() {
+            console.log('🏁 Terminando cuestionario completo...');
+            
+            // Limpiar cualquier timer de forma segura
+            gameController.clearTimer();
+            
+            // Cambiar estado de forma controlada
+            gameController.setState(gameController.STATES.GAME_FINISHED);
+            
+            // Mostrar resultados finales
+            showFinalResults();
+            
+            console.log('🏆 Cuestionario terminado - Mostrando resultados finales');
+        }
+
+        // ===== FUNCIONES PRINCIPALES DEL JUEGO =====
+        
         window.startGame = function() {
+            console.log('🎮 Intentando iniciar juego...');
+            
+            if (!gameController.canExecute('START_GAME')) {
+                alert(`❌ No se puede iniciar el juego en estado: ${gameController.state}`);
+                return;
+            }
+
             if (Object.keys(students).length === 0) {
                 alert('⚠️ No hay estudiantes conectados\n\nEspera a que se conecten estudiantes antes de iniciar.');
                 return;
             }
+
+            if (!currentQuiz) {
+                alert('❌ No hay cuestionario cargado');
+                return;
+            }
+
+            // Cambiar estado de forma controlada
+            gameController.setState(gameController.STATES.GAME_READY);
             
-            // NO cambiar gameState aquí, se cambia en startQuestion
-            console.log('🎯 Cuestionario habilitado para iniciar');
-            
-            // Notificar a estudiantes que el juego está listo
-            updateGameState('game_ready', {
-                message: 'El profesor está listo para comenzar'
+            // Notificar a estudiantes
+            updateGameState('game_started', {
+                totalQuestions: currentQuiz.questions.length,
+                message: 'El cuestionario ha comenzado'
             });
-            
-            // Solo ocultar el botón de comenzar
-            document.getElementById('gameControls').classList.add('hidden');
-            
-            // Mostrar mensaje al profesor
-            alert(`🎯 ¡Listo para comenzar!\n\n${Object.keys(students).length} estudiantes están esperando.\n\nHaz clic en "Iniciar Pregunta" para comenzar.`);
+
+            console.log(`✅ Juego iniciado con ${Object.keys(students).length} estudiantes`);
         };
 
         window.restartGame = function() {
