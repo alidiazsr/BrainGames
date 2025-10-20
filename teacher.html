@@ -1,0 +1,1005 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel del Profesor - BrainGames</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            background: white;
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header h1 {
+            color: #2563eb;
+            font-size: 2em;
+        }
+
+        .room-code {
+            background: #f0f4fa;
+            padding: 10px 20px;
+            border-radius: 10px;
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #2563eb;
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 300px;
+            gap: 20px;
+        }
+
+        .left-panel {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+        }
+
+        .right-panel {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+        }
+
+        .section {
+            margin-bottom: 30px;
+        }
+
+        .section h3 {
+            color: #2563eb;
+            margin-bottom: 15px;
+            font-size: 1.3em;
+        }
+
+        .file-upload {
+            border: 2px dashed #ddd;
+            border-radius: 10px;
+            padding: 30px;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .file-upload:hover {
+            border-color: #2563eb;
+            background: #f8faff;
+        }
+
+        .file-upload.dragover {
+            border-color: #2563eb;
+            background: #f0f4fa;
+        }
+
+        .btn {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            margin: 5px;
+        }
+
+        .btn-primary {
+            background: #2563eb;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #1d4ed8;
+            transform: translateY(-2px);
+        }
+
+        .btn-success {
+            background: #10b981;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #059669;
+            transform: translateY(-2px);
+        }
+
+        .btn-warning {
+            background: #f59e0b;
+            color: white;
+        }
+
+        .btn-warning:hover {
+            background: #d97706;
+            transform: translateY(-2px);
+        }
+
+        .btn-danger {
+            background: #ef4444;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #dc2626;
+            transform: translateY(-2px);
+        }
+
+        .quiz-info {
+            background: #f0f4fa;
+            padding: 20px;
+            border-radius: 10px;
+            border-left: 5px solid #2563eb;
+        }
+
+        .students-list {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .student-item {
+            display: flex;
+            align-items: center;
+            padding: 10px;
+            border-bottom: 1px solid #eee;
+            animation: slideInRight 0.5s ease-out;
+        }
+
+        .student-item:last-child {
+            border-bottom: none;
+        }
+
+        .student-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(45deg, #4CAF50, #45a049);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            margin-right: 10px;
+        }
+
+        .student-name {
+            flex: 1;
+            font-weight: 500;
+        }
+
+        .student-status {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #10b981;
+        }
+
+        @keyframes slideInRight {
+            from {
+                opacity: 0;
+                transform: translateX(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .question-display {
+            background: #f8faff;
+            padding: 25px;
+            border-radius: 15px;
+            margin: 20px 0;
+            border: 2px solid #e5e7eb;
+        }
+
+        .question-display.active {
+            border-color: #2563eb;
+            box-shadow: 0 0 20px rgba(37, 99, 235, 0.2);
+        }
+
+        .timer {
+            font-size: 2em;
+            font-weight: bold;
+            color: #ef4444;
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        .options-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .option {
+            padding: 15px;
+            border-radius: 10px;
+            border: 2px solid #e5e7eb;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .option:hover {
+            border-color: #2563eb;
+            background: #f0f4fa;
+        }
+
+        .option.correct {
+            border-color: #10b981;
+            background: #ecfdf5;
+        }
+
+        .ranking {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            margin: 20px 0;
+        }
+
+        .ranking-item {
+            display: flex;
+            align-items: center;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 10px 0;
+            background: #f8faff;
+        }
+
+        .ranking-position {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #2563eb;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            margin-right: 15px;
+        }
+
+        .ranking-position.gold {
+            background: linear-gradient(45deg, #ffd700, #ffed4e);
+            color: #333;
+        }
+
+        .ranking-position.silver {
+            background: linear-gradient(45deg, #c0c0c0, #e5e5e5);
+            color: #333;
+        }
+
+        .ranking-position.bronze {
+            background: linear-gradient(45deg, #cd7f32, #d4a574);
+            color: white;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .controls {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin: 20px 0;
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+            
+            .header {
+                flex-direction: column;
+                gap: 10px;
+            }
+            
+            .options-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🧠 Panel del Profesor</h1>
+            <div class="room-code">
+                Código de Sala: <span id="roomCode">------</span>
+            </div>
+        </div>
+
+        <div class="main-content">
+            <!-- Panel Principal -->
+            <div class="left-panel">
+                <!-- Sección de carga de cuestionario -->
+                <div id="uploadSection" class="section">
+                    <h3>📋 Cargar Cuestionario</h3>
+                    <div class="file-upload" id="fileUpload">
+                        <p>📁 Arrastra aquí tu archivo JSON o haz clic para seleccionar</p>
+                        <input type="file" id="fileInput" accept=".json" style="display: none;">
+                        <button class="btn btn-primary" onclick="document.getElementById('fileInput').click()">
+                            Seleccionar Archivo
+                        </button>
+                    </div>
+                    
+                    <div id="quizInfo" class="quiz-info hidden">
+                        <h4 id="quizTitle"></h4>
+                        <p id="quizDescription"></p>
+                        <p><strong>Preguntas:</strong> <span id="questionCount"></span></p>
+                        <div class="controls">
+                            <button class="btn btn-success" onclick="openRoom()">🚀 Abrir Sala</button>
+                            <button class="btn btn-warning" onclick="loadDemoQuiz()">📖 Cargar Demo</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sección de control del juego -->
+                <div id="gameSection" class="section hidden">
+                    <h3>🎮 Control del Juego</h3>
+                    
+                    <!-- Vista de pregunta actual -->
+                    <div id="questionDisplay" class="question-display">
+                        <h4 id="currentQuestion"></h4>
+                        <div id="currentOptions" class="options-grid"></div>
+                        <div id="timer" class="timer">00</div>
+                        <div class="controls">
+                            <button id="startQuestionBtn" class="btn btn-success" onclick="startQuestion()">▶️ Iniciar Pregunta</button>
+                            <button id="nextQuestionBtn" class="btn btn-primary hidden" onclick="nextQuestion()">➡️ Siguiente</button>
+                            <button id="showResultsBtn" class="btn btn-warning hidden" onclick="showFinalResults()">🏆 Resultados Finales</button>
+                        </div>
+                    </div>
+
+                    <!-- Ranking temporal -->
+                    <div id="rankingSection" class="hidden">
+                        <h4>📊 Ranking de la Pregunta</h4>
+                        <div id="questionRanking"></div>
+                        <div id="explanation" style="background: #f0f4fa; padding: 15px; border-radius: 10px; margin-top: 15px;"></div>
+                    </div>
+                </div>
+
+                <!-- Resultados finales -->
+                <div id="finalResults" class="section hidden">
+                    <h3>🏆 Resultados Finales</h3>
+                    <div id="podium" class="ranking"></div>
+                    <div class="controls">
+                        <button class="btn btn-primary" onclick="restartGame()">🔄 Nuevo Juego</button>
+                        <button class="btn btn-danger" onclick="closeRoom()">❌ Cerrar Sala</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Panel de Estudiantes -->
+            <div class="right-panel">
+                <div class="section">
+                    <h3>👥 Estudiantes Conectados (<span id="studentCount">0</span>)</h3>
+                    <div id="studentsList" class="students-list">
+                        <p style="text-align: center; color: #666; padding: 20px;">
+                            Esperando estudiantes...
+                        </p>
+                    </div>
+                    
+                    <div id="gameControls" class="hidden" style="margin-top: 20px;">
+                        <button class="btn btn-success" onclick="startGame()" style="width: 100%;">
+                            🎯 Comenzar Cuestionario
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script type="module">
+        // Configuración de Firebase (debes reemplazar con tu configuración real)
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.0.0/firebase-app.js';
+        import { getDatabase, ref, set, onValue, push, serverTimestamp, remove, off } from 'https://www.gstatic.com/firebasejs/10.0.0/firebase-database.js';
+
+        // CONFIGURACIÓN TEMPORAL PARA PRUEBAS (cambiar por tu configuración real)
+        const firebaseConfig = {
+            apiKey: "demo-key",
+            authDomain: "demo-project.firebaseapp.com",
+            databaseURL: "https://demo-project-default-rtdb.firebaseio.com/",
+            projectId: "demo-project"
+        };
+
+        // Variables globales
+        let app = null;
+        let database = null;
+        let currentQuiz = null;
+        let currentQuestionIndex = 0;
+        let roomCode = null;
+        let students = {};
+        let gameState = 'waiting';
+        let questionTimer = null;
+        let questionStartTime = null;
+        let studentAnswers = {};
+        let roomRef = null;
+        let studentsRef = null;
+
+        // Inicializar Firebase y comunicación
+        function initializeFirebase() {
+            try {
+                app = initializeApp(firebaseConfig);
+                database = getDatabase(app);
+                console.log('✅ Firebase inicializado correctamente');
+                return true;
+            } catch (error) {
+                console.log('❌ Error de Firebase, usando simulación local:', error);
+                return false;
+            }
+        }
+
+        // Crear sala en Firebase
+        function createRoomInFirebase() {
+            if (!database) return;
+            
+            roomRef = ref(database, `rooms/${roomCode}`);
+            studentsRef = ref(database, `rooms/${roomCode}/students`);
+            
+            // Crear la sala
+            set(roomRef, {
+                quiz: currentQuiz,
+                currentQuestion: 0,
+                gameState: 'waiting',
+                createdAt: serverTimestamp(),
+                teacher: 'profesor'
+            });
+
+            // Escuchar estudiantes que se unen
+            onValue(studentsRef, (snapshot) => {
+                const studentsData = snapshot.val();
+                console.log('Estudiantes actualizados:', studentsData);
+                
+                if (studentsData) {
+                    updateStudentsList(studentsData);
+                } else {
+                    // No hay estudiantes conectados
+                    resetStudentsList();
+                }
+            });
+
+            console.log(`🚀 Sala ${roomCode} creada en Firebase`);
+        }
+
+        // Actualizar lista de estudiantes en la interfaz
+        function updateStudentsList(studentsData) {
+            const studentsList = document.getElementById('studentsList');
+            studentsList.innerHTML = '';
+            
+            students = studentsData;
+            const studentCount = Object.keys(students).length;
+            
+            Object.keys(students).forEach(studentId => {
+                const student = students[studentId];
+                const studentItem = document.createElement('div');
+                studentItem.className = 'student-item';
+                studentItem.innerHTML = `
+                    <div class="student-avatar">${student.avatar}</div>
+                    <div class="student-name">${student.name}</div>
+                    <div class="student-status"></div>
+                `;
+                studentsList.appendChild(studentItem);
+            });
+            
+            document.getElementById('studentCount').textContent = studentCount;
+            
+            // Mostrar controles de juego si hay estudiantes
+            if (studentCount > 0 && currentQuiz) {
+                document.getElementById('gameControls').classList.remove('hidden');
+            } else {
+                document.getElementById('gameControls').classList.add('hidden');
+            }
+        }
+
+        // Resetear lista de estudiantes
+        function resetStudentsList() {
+            const studentsList = document.getElementById('studentsList');
+            studentsList.innerHTML = '<p style="text-align: center; color: #666; padding: 20px;">Esperando estudiantes...</p>';
+            document.getElementById('studentCount').textContent = '0';
+            document.getElementById('gameControls').classList.add('hidden');
+            students = {};
+        }
+
+        // Enviar actualización de estado del juego
+        function updateGameState(newState, data = {}) {
+            if (!database || !roomRef) return;
+            
+            const updateData = {
+                gameState: newState,
+                currentQuestion: currentQuestionIndex,
+                lastUpdate: serverTimestamp(),
+                ...data
+            };
+            
+            set(ref(database, `rooms/${roomCode}/gameData`), updateData);
+            console.log(`📡 Estado del juego actualizado: ${newState}`);
+        }
+
+        // Funciones principales
+        window.loadDemoQuiz = function() {
+            const demoQuiz = {
+                title: "JavaScript Básico",
+                description: "Cuestionario de conceptos fundamentales de JavaScript",
+                questions: [
+                    {
+                        id: 1,
+                        question: "¿Cuál es la forma correcta de declarar una variable en JavaScript?",
+                        options: [
+                            "variable miVariable = 'hola';",
+                            "var miVariable = 'hola';",
+                            "declare miVariable = 'hola';",
+                            "set miVariable = 'hola';"
+                        ],
+                        correct: 1,
+                        explanation: "La palabra clave 'var' es una de las formas correctas de declarar variables en JavaScript, junto con 'let' y 'const'.",
+                        timeLimit: 20
+                    },
+                    {
+                        id: 2,
+                        question: "¿Qué tipo de datos NO existe en JavaScript?",
+                        options: [
+                            "String",
+                            "Boolean",
+                            "Integer",
+                            "Undefined"
+                        ],
+                        correct: 2,
+                        explanation: "JavaScript no tiene un tipo 'Integer' específico. Los números se manejan como 'Number', que incluye tanto enteros como decimales.",
+                        timeLimit: 25
+                    },
+                    {
+                        id: 3,
+                        question: "¿Cuál es el resultado de: console.log(typeof null)?",
+                        options: [
+                            "null",
+                            "undefined",
+                            "object",
+                            "boolean"
+                        ],
+                        correct: 2,
+                        explanation: "Esta es una peculiaridad histórica de JavaScript. typeof null devuelve 'object', aunque null no es realmente un objeto.",
+                        timeLimit: 30
+                    }
+                ]
+            };
+            
+            loadQuiz(demoQuiz);
+        };
+
+        function loadQuiz(quiz) {
+            currentQuiz = quiz;
+            document.getElementById('quizTitle').textContent = quiz.title;
+            document.getElementById('quizDescription').textContent = quiz.description;
+            document.getElementById('questionCount').textContent = quiz.questions.length;
+            document.getElementById('quizInfo').classList.remove('hidden');
+        }
+
+        window.openRoom = function() {
+            if (!currentQuiz) return;
+            
+            roomCode = generateRoomCode();
+            document.getElementById('roomCode').textContent = roomCode;
+            
+            // Inicializar Firebase
+            const firebaseReady = initializeFirebase();
+            
+            // Ocultar sección de carga y mostrar sección de juego
+            document.getElementById('uploadSection').classList.add('hidden');
+            document.getElementById('gameSection').classList.remove('hidden');
+            
+            // Mostrar primera pregunta
+            showQuestion(0);
+            
+            if (firebaseReady) {
+                // Crear sala en Firebase
+                createRoomInFirebase();
+            } else {
+                // Modo sin Firebase - solo mostrar mensaje
+                console.log('⚠️ Funcionando en modo local - configura Firebase para sincronización real');
+                alert('⚠️ Modo local activo\n\nPara sincronización real entre PCs, configura Firebase según el README.md');
+            }
+            
+            console.log(`Sala creada con código: ${roomCode}`);
+        };
+
+        function generateRoomCode() {
+            return Math.random().toString(36).substr(2, 6).toUpperCase();
+        }
+
+        function showQuestion(index) {
+            if (!currentQuiz || index >= currentQuiz.questions.length) return;
+            
+            const question = currentQuiz.questions[index];
+            currentQuestionIndex = index;
+            
+            document.getElementById('currentQuestion').textContent = 
+                `Pregunta ${index + 1}: ${question.question}`;
+            
+            const optionsContainer = document.getElementById('currentOptions');
+            optionsContainer.innerHTML = '';
+            
+            question.options.forEach((option, i) => {
+                const optionDiv = document.createElement('div');
+                optionDiv.className = 'option';
+                optionDiv.textContent = `${String.fromCharCode(65 + i)}) ${option}`;
+                if (i === question.correct) {
+                    optionDiv.classList.add('correct');
+                }
+                optionsContainer.appendChild(optionDiv);
+            });
+            
+            document.getElementById('timer').textContent = question.timeLimit;
+        }
+
+        window.startQuestion = function() {
+            if (!currentQuiz) return;
+            
+            const question = currentQuiz.questions[currentQuestionIndex];
+            questionStartTime = Date.now();
+            studentAnswers = {};
+            
+            // Notificar inicio de pregunta a estudiantes
+            updateGameState('question_started', {
+                question: question,
+                questionIndex: currentQuestionIndex,
+                startTime: questionStartTime
+            });
+            
+            // Iniciar temporizador
+            let timeLeft = question.timeLimit;
+            document.getElementById('timer').textContent = timeLeft;
+            
+            questionTimer = setInterval(() => {
+                timeLeft--;
+                document.getElementById('timer').textContent = timeLeft;
+                
+                if (timeLeft <= 0) {
+                    endQuestion();
+                }
+            }, 1000);
+            
+            // Cambiar controles
+            document.getElementById('startQuestionBtn').classList.add('hidden');
+            document.getElementById('timer').style.color = '#ef4444';
+            
+            gameState = 'question';
+        };
+
+        function endQuestion() {
+            clearInterval(questionTimer);
+            
+            // Notificar fin de pregunta a estudiantes
+            updateGameState('question_ended', {
+                correctAnswer: currentQuiz.questions[currentQuestionIndex].correct,
+                explanation: currentQuiz.questions[currentQuestionIndex].explanation
+            });
+            
+            // Mostrar ranking de la pregunta
+            showQuestionRanking();
+            
+            // Mostrar explicación
+            const question = currentQuiz.questions[currentQuestionIndex];
+            document.getElementById('explanation').innerHTML = 
+                `<strong>✅ Respuesta correcta:</strong> ${question.options[question.correct]}<br>
+                 <strong>💡 Explicación:</strong> ${question.explanation}`;
+            
+            document.getElementById('rankingSection').classList.remove('hidden');
+            
+            // Mostrar botón siguiente o finalizar
+            if (currentQuestionIndex < currentQuiz.questions.length - 1) {
+                document.getElementById('nextQuestionBtn').classList.remove('hidden');
+            } else {
+                document.getElementById('showResultsBtn').classList.remove('hidden');
+            }
+            
+            gameState = 'results';
+        }
+
+        function showQuestionRanking() {
+            const ranking = document.getElementById('questionRanking');
+            ranking.innerHTML = '';
+            
+            // Convertir respuestas de estudiantes reales a array para ranking
+            const studentAnswers = [];
+            Object.keys(students).forEach(studentName => {
+                const student = students[studentName];
+                const answer = student.currentAnswer || null;
+                const time = student.answerTime || 0;
+                
+                studentAnswers.push({
+                    name: studentName,
+                    answer: answer,
+                    time: time,
+                    avatar: student.avatar
+                });
+            });
+            
+            // Si no hay estudiantes conectados, mostrar mensaje
+            if (studentAnswers.length === 0) {
+                ranking.innerHTML = '<p style="text-align: center; color: #666; padding: 20px;">No hay estudiantes conectados aún.</p>';
+                return;
+            }
+            
+            // Ordenar por respuesta correcta y luego por tiempo
+            studentAnswers.sort((a, b) => {
+                const correctAnswer = currentQuiz.questions[currentQuestionIndex].correct;
+                const aCorrect = a.answer === correctAnswer;
+                const bCorrect = b.answer === correctAnswer;
+                
+                if (aCorrect && !bCorrect) return -1;
+                if (!aCorrect && bCorrect) return 1;
+                if (aCorrect && bCorrect) return a.time - b.time;
+                return 0;
+            });
+            
+            studentAnswers.forEach((student, index) => {
+                const item = document.createElement('div');
+                item.className = 'ranking-item';
+                
+                const correctAnswer = currentQuiz.questions[currentQuestionIndex].correct;
+                const isCorrect = student.answer === correctAnswer;
+                const points = isCorrect ? Math.max(100 - Math.floor(student.time / 100), 20) : 0;
+                
+                item.innerHTML = `
+                    <div class="ranking-position">${index + 1}</div>
+                    <div class="student-avatar">${student.avatar}</div>
+                    <div class="student-name">
+                        ${student.name}
+                        <br><small>${isCorrect ? '✅' : '❌'} ${points} puntos</small>
+                    </div>
+                `;
+                
+                ranking.appendChild(item);
+            });
+        }
+
+        window.nextQuestion = function() {
+            document.getElementById('rankingSection').classList.add('hidden');
+            document.getElementById('nextQuestionBtn').classList.add('hidden');
+            document.getElementById('startQuestionBtn').classList.remove('hidden');
+            
+            currentQuestionIndex++;
+            showQuestion(currentQuestionIndex);
+            
+            // Notificar nueva pregunta a estudiantes
+            updateGameState('next_question', {
+                questionIndex: currentQuestionIndex,
+                question: currentQuiz.questions[currentQuestionIndex]
+            });
+        };
+
+        window.showFinalResults = function() {
+            document.getElementById('gameSection').classList.add('hidden');
+            document.getElementById('finalResults').classList.remove('hidden');
+            
+            // Notificar resultados finales a estudiantes
+            updateGameState('game_finished');
+            
+            showPodium();
+        };
+
+        function showPodium() {
+            const podium = document.getElementById('podium');
+            podium.innerHTML = '<h4>🏆 ¡Felicitaciones a todas las participantes!</h4>';
+            
+            // Calcular resultados finales de estudiantes reales
+            const finalResults = [];
+            Object.keys(students).forEach(studentName => {
+                const student = students[studentName];
+                const totalPoints = student.totalScore || 0;
+                
+                finalResults.push({
+                    name: studentName,
+                    totalPoints: totalPoints,
+                    avatar: student.avatar
+                });
+            });
+            
+            // Si no hay estudiantes conectados, mostrar mensaje
+            if (finalResults.length === 0) {
+                podium.innerHTML = '<h4>🏆 No hay estudiantes conectados</h4><p style="text-align: center; color: #666; padding: 20px;">Espera a que los estudiantes se conecten para ver los resultados.</p>';
+                return;
+            }
+            
+            // Ordenar por puntos totales
+            finalResults.sort((a, b) => b.totalPoints - a.totalPoints);
+            
+            finalResults.forEach((student, index) => {
+                const item = document.createElement('div');
+                item.className = 'ranking-item';
+                
+                let positionClass = '';
+                let emoji = '';
+                if (index === 0) { positionClass = 'gold'; emoji = '🥇'; }
+                else if (index === 1) { positionClass = 'silver'; emoji = '🥈'; }
+                else if (index === 2) { positionClass = 'bronze'; emoji = '🥉'; }
+                
+                item.innerHTML = `
+                    <div class="ranking-position ${positionClass}">${emoji || (index + 1)}</div>
+                    <div class="student-avatar">${student.avatar}</div>
+                    <div class="student-name">
+                        ${student.name}
+                        <br><small>💯 ${student.totalPoints} puntos totales</small>
+                    </div>
+                `;
+                
+                podium.appendChild(item);
+            });
+        }
+
+        window.startGame = function() {
+            if (Object.keys(students).length === 0) {
+                alert('⚠️ No hay estudiantes conectados\n\nEspera a que se conecten estudiantes antes de iniciar.');
+                return;
+            }
+            
+            gameState = 'playing';
+            
+            // Notificar a estudiantes via Firebase
+            updateGameState('game_started', {
+                currentQuestion: currentQuiz.questions[0]
+            });
+            
+            alert(`🎯 ¡Cuestionario iniciado!\n\n${Object.keys(students).length} estudiantes verán la primera pregunta.`);
+            document.getElementById('gameControls').classList.add('hidden');
+        };
+
+        window.restartGame = function() {
+            currentQuestionIndex = 0;
+            studentAnswers = {};
+            gameState = 'waiting';
+            
+            document.getElementById('finalResults').classList.add('hidden');
+            document.getElementById('uploadSection').classList.remove('hidden');
+            document.getElementById('quizInfo').classList.add('hidden');
+            document.getElementById('roomCode').textContent = '------';
+        };
+
+        window.closeRoom = function() {
+            if (confirm('¿Estás segura de que quieres cerrar la sala?')) {
+                restartGame();
+            }
+        };
+
+        // Manejo de archivos
+        document.getElementById('fileInput').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file && file.type === 'application/json') {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    try {
+                        const quiz = JSON.parse(e.target.result);
+                        loadQuiz(quiz);
+                    } catch (error) {
+                        alert('❌ Error al cargar el archivo JSON. Verifica el formato.');
+                    }
+                };
+                reader.readAsText(file);
+            }
+        });
+
+        // Drag and drop
+        const fileUpload = document.getElementById('fileUpload');
+        
+        fileUpload.addEventListener('dragover', function(e) {
+            e.preventDefault();
+            this.classList.add('dragover');
+        });
+        
+        fileUpload.addEventListener('dragleave', function(e) {
+            e.preventDefault();
+            this.classList.remove('dragover');
+        });
+        
+        fileUpload.addEventListener('drop', function(e) {
+            e.preventDefault();
+            this.classList.remove('dragover');
+            
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                document.getElementById('fileInput').files = files;
+                document.getElementById('fileInput').dispatchEvent(new Event('change'));
+            }
+        });
+
+        function addStudent(name, avatar) {
+            const studentsList = document.getElementById('studentsList');
+            
+            // Limpiar mensaje de espera
+            if (Object.keys(students).length === 0) {
+                studentsList.innerHTML = '';
+            }
+            
+            students[name] = { 
+                name, 
+                avatar, 
+                connected: true,
+                currentAnswer: null,
+                answerTime: 0,
+                totalScore: 0
+            };
+            
+            const studentItem = document.createElement('div');
+            studentItem.className = 'student-item';
+            studentItem.innerHTML = `
+                <div class="student-avatar">${avatar}</div>
+                <div class="student-name">${name}</div>
+                <div class="student-status"></div>
+            `;
+            
+            studentsList.appendChild(studentItem);
+            document.getElementById('studentCount').textContent = Object.keys(students).length;
+            
+            // Mostrar controles de juego si hay estudiantes
+            if (Object.keys(students).length > 0 && currentQuiz) {
+                document.getElementById('gameControls').classList.remove('hidden');
+            }
+            
+            console.log(`Estudiante ${name} se conectó a la sala ${roomCode}`);
+        }
+
+        // Función para simular conexión de estudiante (para pruebas)
+        window.simulateStudentConnection = function() {
+            const testName = prompt('Nombre del estudiante de prueba:');
+            if (testName) {
+                const avatar = testName.charAt(0).toUpperCase();
+                addStudent(testName, avatar);
+            }
+        };
+
+        // Agregar botón de prueba en modo desarrollo
+        console.log('💡 Para probar conexiones: simulateStudentConnection()');
+        console.log(`📋 Código de sala actual: ${roomCode || 'No generado aún'}`);
+    </script>
+    
+    <!-- Botón oculto para pruebas (solo visible en consola) -->
+    <div style="position: fixed; bottom: 10px; right: 10px; z-index: 1000;">
+        <button onclick="simulateStudentConnection()" style="background: #666; color: white; border: none; padding: 8px; border-radius: 5px; font-size: 12px; display: none;" id="testBtn">
+            + Estudiante Test
+        </button>
+    </div>
+
+    <script>
+        // Mostrar botón de prueba solo cuando hay sala abierta
+        window.addEventListener('load', function() {
+            const showTestButton = () => {
+                const btn = document.getElementById('testBtn');
+                if (roomCode && btn) {
+                    btn.style.display = 'block';
+                }
+            };
+            
+            // Revisar cada segundo si hay código de sala
+            setInterval(() => {
+                if (roomCode) showTestButton();
+            }, 1000);
+        });
+    </script>
+</body>
+</html>

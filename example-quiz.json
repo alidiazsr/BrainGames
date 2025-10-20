@@ -1,0 +1,45 @@
+{
+  "title": "JavaScript Básico",
+  "description": "Cuestionario de conceptos fundamentales de JavaScript",
+  "questions": [
+    {
+      "id": 1,
+      "question": "¿Cuál es la forma correcta de declarar una variable en JavaScript?",
+      "options": [
+        "variable miVariable = 'hola';",
+        "var miVariable = 'hola';",
+        "declare miVariable = 'hola';",
+        "set miVariable = 'hola';"
+      ],
+      "correct": 1,
+      "explanation": "La palabra clave 'var' es una de las formas correctas de declarar variables en JavaScript, junto con 'let' y 'const'.",
+      "timeLimit": 20
+    },
+    {
+      "id": 2,
+      "question": "¿Qué tipo de datos NO existe en JavaScript?",
+      "options": [
+        "String",
+        "Boolean",
+        "Integer",
+        "Undefined"
+      ],
+      "correct": 2,
+      "explanation": "JavaScript no tiene un tipo 'Integer' específico. Los números se manejan como 'Number', que incluye tanto enteros como decimales.",
+      "timeLimit": 25
+    },
+    {
+      "id": 3,
+      "question": "¿Cuál es el resultado de: console.log(typeof null)?",
+      "options": [
+        "null",
+        "undefined",
+        "object",
+        "boolean"
+      ],
+      "correct": 2,
+      "explanation": "Esta es una peculiaridad histórica de JavaScript. typeof null devuelve 'object', aunque null no es realmente un objeto.",
+      "timeLimit": 30
+    }
+  ]
+}

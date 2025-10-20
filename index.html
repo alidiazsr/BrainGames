@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BrainGames - Evaluador Interactivo</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+            background: white;
+            margin-top: 40px;
+            border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+            animation: fadeInUp 0.8s ease-out;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        h1 {
+            text-align: center;
+            color: #2563eb;
+            font-size: 2.8em;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .subtitle {
+            font-size: 1.3em;
+            text-align: center;
+            margin-bottom: 30px;
+            color: #555;
+            line-height: 1.6;
+        }
+
+        .info-box {
+            background: #f0f4fa;
+            padding: 25px;
+            border-radius: 15px;
+            margin: 30px 0;
+            border-left: 5px solid #2563eb;
+        }
+
+        .info-box h3 {
+            color: #2563eb;
+            margin-bottom: 15px;
+            font-size: 1.4em;
+        }
+
+        .info-box ul {
+            font-size: 1.1em;
+            line-height: 1.8;
+            padding-left: 20px;
+        }
+
+        .info-box li {
+            margin-bottom: 8px;
+        }
+
+        .access-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin: 40px 0;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 15px 30px;
+            font-size: 1.2em;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .btn-student {
+            background: linear-gradient(45deg, #4CAF50, #45a049);
+            color: white;
+            box-shadow: 0 4px 15px rgba(76, 175, 80, 0.3);
+        }
+
+        .btn-student:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(76, 175, 80, 0.4);
+        }
+
+        .btn-teacher {
+            background: linear-gradient(45deg, #ff6b35, #f7931e);
+            color: white;
+            box-shadow: 0 4px 15px rgba(255, 107, 53, 0.3);
+        }
+
+        .btn-teacher:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(255, 107, 53, 0.4);
+        }
+
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin: 30px 0;
+        }
+
+        .feature-card {
+            background: linear-gradient(145deg, #f8f9fa, #e9ecef);
+            padding: 20px;
+            border-radius: 15px;
+            text-align: center;
+            transition: transform 0.3s ease;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .feature-icon {
+            font-size: 3em;
+            margin-bottom: 10px;
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 40px;
+            padding: 20px;
+            color: #666;
+            border-top: 1px solid #eee;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                margin: 10px;
+                padding: 15px;
+            }
+            
+            h1 {
+                font-size: 2.2em;
+            }
+            
+            .access-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .btn {
+                width: 250px;
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧠 ¡Bienvenidas al Evaluador Interactivo!</h1>
+        
+        <p class="subtitle">
+            Esta plataforma permite realizar cuestionarios interactivos tipo Kahoot/Blooket sobre JavaScript y programación.
+        </p>
+
+        <div class="info-box">
+            <h3>🎯 ¿Cómo funciona?</h3>
+            <ul>
+                <li>La profesora selecciona o carga un cuestionario y da acceso a las alumnas.</li>
+                <li>Cada alumna ingresa su nombre y espera el inicio.</li>
+                <li>Las preguntas aparecen una a una, con tiempo límite para responder.</li>
+                <li>Al finalizar cada pregunta, se muestran los resultados y la justificación.</li>
+                <li>Al terminar, se muestra el ranking final de todas las participantes.</li>
+            </ul>
+            <p style="margin-top: 15px; font-weight: bold; color: #2563eb;">
+                ¡Diviértete aprendiendo y compitiendo! 🏆
+            </p>
+        </div>
+
+        <div class="features">
+            <div class="feature-card">
+                <div class="feature-icon">⚡</div>
+                <h4>Tiempo Real</h4>
+                <p>Resultados instantáneos y sincronización en vivo</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">🎮</div>
+                <h4>Gamificación</h4>
+                <p>Sistema de puntos y rankings competitivos</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">📱</div>
+                <h4>Multiplataforma</h4>
+                <p>Funciona en cualquier dispositivo con navegador</p>
+            </div>
+        </div>
+
+        <div class="access-buttons">
+            <button class="btn btn-student" onclick="accessStudent()">
+                👩‍🎓 Acceso Estudiante
+            </button>
+            <button class="btn btn-teacher" onclick="accessTeacher()">
+                👩‍🏫 Acceso Profesor
+            </button>
+        </div>
+
+        <div class="footer">
+            <p>Desarrollado con ❤️ para el aprendizaje interactivo</p>
+            <p>Powered by Firebase & GitHub Pages</p>
+        </div>
+    </div>
+
+    <script>
+        function accessStudent() {
+            // Redirigir al panel del estudiante
+            window.location.href = 'student.html';
+        }
+
+        function accessTeacher() {
+            // Acceso de profesor con contraseña
+            const password = prompt('🔐 Ingresa la contraseña de profesor:');
+            
+            if (password === 'profesor123') {
+                // Redirigir al panel del profesor
+                window.location.href = 'teacher.html';
+            } else if (password === null) {
+                return; // Usuario canceló
+            } else {
+                alert('❌ Contraseña incorrecta\n\nIntenta nuevamente.');
+            }
+        }
+
+        // Animación de entrada
+        document.addEventListener('DOMContentLoaded', function() {
+            const container = document.querySelector('.container');
+            container.style.opacity = '0';
+            container.style.transform = 'translateY(30px)';
+            
+            setTimeout(() => {
+                container.style.transition = 'all 0.8s ease-out';
+                container.style.opacity = '1';
+                container.style.transform = 'translateY(0)';
+            }, 100);
+        });
+    </script>
+</body>
+</html>

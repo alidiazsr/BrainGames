@@ -1,0 +1,1175 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel del Estudiante - BrainGames</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            background: white;
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+
+        .header h1 {
+            color: #2563eb;
+            font-size: 2.2em;
+            margin-bottom: 10px;
+        }
+
+        .student-info {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .student-avatar {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: linear-gradient(45deg, #4CAF50, #45a049);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 1.5em;
+        }
+
+        .main-panel {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            min-height: 500px;
+        }
+
+        .section {
+            margin-bottom: 30px;
+        }
+
+        .section h3 {
+            color: #2563eb;
+            margin-bottom: 20px;
+            font-size: 1.4em;
+            text-align: center;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e5e7eb;
+            border-radius: 10px;
+            font-size: 1.1em;
+            transition: all 0.3s ease;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: #2563eb;
+            box-shadow: 0 0 10px rgba(37, 99, 235, 0.2);
+        }
+
+        .btn {
+            padding: 15px 30px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 1.1em;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            justify-content: center;
+        }
+
+        .btn-primary {
+            background: linear-gradient(45deg, #2563eb, #1d4ed8);
+            color: white;
+            width: 100%;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(37, 99, 235, 0.3);
+        }
+
+        .btn-option {
+            background: #f8faff;
+            color: #333;
+            border: 2px solid #e5e7eb;
+            width: 100%;
+            text-align: left;
+            margin-bottom: 15px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-option:hover {
+            border-color: #2563eb;
+            background: #f0f4fa;
+        }
+
+        .btn-option.selected {
+            border-color: #2563eb;
+            background: #e0f2fe;
+        }
+
+        .btn-option.correct {
+            border-color: #10b981;
+            background: #ecfdf5;
+        }
+
+        .btn-option.incorrect {
+            border-color: #ef4444;
+            background: #fef2f2;
+        }
+
+        .question-card {
+            background: #f8faff;
+            padding: 25px;
+            border-radius: 15px;
+            margin-bottom: 25px;
+            border: 2px solid #e5e7eb;
+        }
+
+        .question-number {
+            background: #2563eb;
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            font-weight: bold;
+            display: inline-block;
+            margin-bottom: 15px;
+        }
+
+        .question-text {
+            font-size: 1.3em;
+            font-weight: 600;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        .timer-container {
+            text-align: center;
+            margin: 25px 0;
+        }
+
+        .timer {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            background: #fee2e2;
+            padding: 15px 25px;
+            border-radius: 50px;
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #dc2626;
+        }
+
+        .timer.warning {
+            background: #fef3c7;
+            color: #d97706;
+        }
+
+        .timer.safe {
+            background: #dcfce7;
+            color: #16a34a;
+        }
+
+        .waiting-room {
+            text-align: center;
+            padding: 40px 20px;
+        }
+
+        .waiting-animation {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 20px;
+            border: 4px solid #e5e7eb;
+            border-top: 4px solid #2563eb;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .ranking {
+            background: #f8faff;
+            border-radius: 15px;
+            padding: 25px;
+            margin: 20px 0;
+        }
+
+        .ranking h4 {
+            color: #2563eb;
+            margin-bottom: 20px;
+            text-align: center;
+            font-size: 1.3em;
+        }
+
+        .ranking-item {
+            display: flex;
+            align-items: center;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 10px 0;
+            background: white;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+
+        .ranking-item.me {
+            border: 2px solid #2563eb;
+            background: #f0f4fa;
+        }
+
+        .ranking-position {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #6b7280;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            margin-right: 15px;
+        }
+
+        .ranking-position.gold {
+            background: linear-gradient(45deg, #ffd700, #ffed4e);
+            color: #333;
+        }
+
+        .ranking-position.silver {
+            background: linear-gradient(45deg, #c0c0c0, #e5e5e5);
+            color: #333;
+        }
+
+        .ranking-position.bronze {
+            background: linear-gradient(45deg, #cd7f32, #d4a574);
+        }
+
+        .ranking-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(45deg, #4CAF50, #45a049);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            margin-right: 15px;
+        }
+
+        .ranking-info {
+            flex: 1;
+        }
+
+        .ranking-name {
+            font-weight: 600;
+            margin-bottom: 3px;
+        }
+
+        .ranking-points {
+            font-size: 0.9em;
+            color: #666;
+        }
+
+        .explanation {
+            background: #f0f9ff;
+            border: 2px solid #0ea5e9;
+            border-radius: 15px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+
+        .explanation h5 {
+            color: #0ea5e9;
+            margin-bottom: 10px;
+            font-size: 1.1em;
+        }
+
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            font-weight: 600;
+        }
+
+        .status-connected {
+            background: #dcfce7;
+            color: #16a34a;
+        }
+
+        .status-waiting {
+            background: #fef3c7;
+            color: #d97706;
+        }
+
+        .status-playing {
+            background: #dbeafe;
+            color: #2563eb;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .podium {
+            text-align: center;
+            padding: 40px 20px;
+        }
+
+        .podium-title {
+            font-size: 2.5em;
+            margin-bottom: 30px;
+            color: #2563eb;
+        }
+
+        .podium-positions {
+            display: flex;
+            justify-content: center;
+            align-items: end;
+            gap: 20px;
+            margin: 30px 0;
+        }
+
+        .podium-place {
+            text-align: center;
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+        }
+
+        .podium-place.first {
+            order: 2;
+            transform: scale(1.1);
+        }
+
+        .podium-place.second {
+            order: 1;
+        }
+
+        .podium-place.third {
+            order: 3;
+        }
+
+        .confetti {
+            position: fixed;
+            width: 10px;
+            height: 10px;
+            background: #2563eb;
+            animation: confetti-fall 3s linear infinite;
+        }
+
+        @keyframes confetti-fall {
+            0% {
+                transform: translateY(-100vh) rotate(0deg);
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(100vh) rotate(720deg);
+                opacity: 0;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+            
+            .header h1 {
+                font-size: 1.8em;
+            }
+            
+            .main-panel {
+                padding: 20px;
+            }
+            
+            .podium-positions {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .podium-place {
+                width: 90%;
+                margin-bottom: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header con información del estudiante -->
+        <div class="header">
+            <h1>🎓 Panel del Estudiante</h1>
+            <div id="studentHeader" class="hidden">
+                <div class="student-info">
+                    <div class="student-avatar" id="myAvatar"></div>
+                    <div>
+                        <h3 id="myName"></h3>
+                        <span class="status-badge status-connected" id="myStatus">
+                            🟢 Conectado
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="main-panel">
+            <!-- Pantalla de ingreso -->
+            <div id="joinScreen">
+                <div class="section">
+                    <h3>🚀 Únete al Cuestionario</h3>
+                    
+                    <div class="form-group">
+                        <label for="studentName">👤 Tu nombre:</label>
+                        <input type="text" id="studentName" class="form-control" 
+                               placeholder="Escribe tu nombre completo" maxlength="30">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="roomCode">🔑 Código de sala:</label>
+                        <input type="text" id="roomCode" class="form-control" 
+                               placeholder="Ingresa el código de 6 dígitos" maxlength="6">
+                    </div>
+                    
+                    <button class="btn btn-primary" onclick="joinRoom()">
+                        🎯 Unirse al Cuestionario
+                    </button>
+                </div>
+            </div>
+
+            <!-- Sala de espera -->
+            <div id="waitingRoom" class="hidden">
+                <div class="waiting-room">
+                    <div class="waiting-animation"></div>
+                    <h3>⏳ Esperando que comience el cuestionario...</h3>
+                    <p>El profesor iniciará el juego cuando todos estén listos.</p>
+                    <p style="margin-top: 20px;">
+                        <strong>Sala:</strong> <span id="currentRoomCode"></span><br>
+                        <strong>Participantes:</strong> <span id="participantCount">0</span>
+                    </p>
+                </div>
+            </div>
+
+            <!-- Pantalla de pregunta -->
+            <div id="questionScreen" class="hidden">
+                <div class="question-card">
+                    <div class="question-number" id="questionNumber">Pregunta 1 de 3</div>
+                    <div class="question-text" id="questionText"></div>
+                </div>
+
+                <div class="timer-container">
+                    <div class="timer safe" id="questionTimer">
+                        ⏱️ <span id="timeLeft">30</span>s
+                    </div>
+                </div>
+
+                <div id="optionsContainer"></div>
+
+                <div id="answerStatus" class="hidden" style="text-align: center; margin-top: 20px;">
+                    <p id="answerMessage" style="font-size: 1.2em; font-weight: bold;"></p>
+                </div>
+            </div>
+
+            <!-- Ranking de pregunta -->
+            <div id="questionRanking" class="hidden">
+                <div class="ranking">
+                    <h4>📊 Resultados de la Pregunta</h4>
+                    <div id="questionRankingList"></div>
+                </div>
+                
+                <div id="questionExplanation" class="explanation">
+                    <h5>💡 Explicación:</h5>
+                    <p id="explanationText"></p>
+                </div>
+
+                <div style="text-align: center; margin-top: 25px;">
+                    <p style="font-size: 1.1em; color: #666;">
+                        ⏳ Esperando la siguiente pregunta...
+                    </p>
+                </div>
+            </div>
+
+            <!-- Resultados finales -->
+            <div id="finalResults" class="hidden">
+                <div class="podium">
+                    <div class="podium-title">🏆 ¡Cuestionario Completado!</div>
+                    
+                    <div id="myFinalPosition" style="margin: 20px 0; padding: 20px; background: #f0f4fa; border-radius: 15px;">
+                        <h3 id="myPositionText"></h3>
+                        <p id="myPointsText" style="font-size: 1.2em; color: #2563eb;"></p>
+                    </div>
+
+                    <div class="ranking">
+                        <h4>🏅 Clasificación Final</h4>
+                        <div id="finalRankingList"></div>
+                    </div>
+
+                    <div style="text-align: center; margin-top: 30px;">
+                        <button class="btn btn-primary" onclick="goHome()" style="width: auto;">
+                            🏠 Volver al Inicio
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        // Configuración de Firebase 
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.0.0/firebase-app.js';
+        import { getDatabase, ref, set, onValue, push, serverTimestamp, remove, off } from 'https://www.gstatic.com/firebasejs/10.0.0/firebase-database.js';
+
+        // CONFIGURACIÓN TEMPORAL PARA PRUEBAS (cambiar por tu configuración real)
+        const firebaseConfig = {
+            apiKey: "demo-key",
+            authDomain: "demo-project.firebaseapp.com",
+            databaseURL: "https://demo-project-default-rtdb.firebaseio.com/",
+            projectId: "demo-project"
+        };
+
+        // Variables globales
+        let app = null;
+        let database = null;
+        let studentName = '';
+        let studentAvatar = '';
+        let studentId = '';
+        let currentRoom = null;
+        let gameState = 'joining';
+        let currentQuestion = null;
+        let selectedAnswer = null;
+        let questionTimer = null;
+        let myScore = 0;
+        let roomRef = null;
+        let gameDataRef = null;
+
+        // Inicializar Firebase
+        function initializeFirebase() {
+            try {
+                app = initializeApp(firebaseConfig);
+                database = getDatabase(app);
+                console.log('✅ Firebase inicializado correctamente');
+                return true;
+            } catch (error) {
+                console.log('❌ Error de Firebase, modo local:', error);
+                return false;
+            }
+        }
+
+        // Unirse a la sala en Firebase
+        function joinRoomInFirebase() {
+            if (!database) {
+                alert('❌ Error: No se puede conectar a Firebase\n\nRevisa la configuración.');
+                return false;
+            }
+
+            // Verificar si la sala existe
+            roomRef = ref(database, `rooms/${currentRoom}`);
+            
+            return new Promise((resolve) => {
+                onValue(roomRef, (snapshot) => {
+                    const roomData = snapshot.val();
+                    
+                    if (!roomData) {
+                        alert('❌ Sala no encontrada\n\nVerifica el código de sala.');
+                        resolve(false);
+                        return;
+                    }
+
+                    // Unirse a la sala
+                    studentId = `student_${Date.now()}`;
+                    const studentRef = ref(database, `rooms/${currentRoom}/students/${studentId}`);
+                    
+                    set(studentRef, {
+                        name: studentName,
+                        avatar: studentAvatar,
+                        joinedAt: serverTimestamp(),
+                        connected: true,
+                        currentAnswer: null,
+                        answerTime: 0,
+                        totalScore: 0
+                    });
+
+                    // Escuchar cambios en el estado del juego
+                    gameDataRef = ref(database, `rooms/${currentRoom}/gameData`);
+                    onValue(gameDataRef, handleGameStateChange);
+
+                    console.log(`✅ Unido a sala ${currentRoom} como ${studentName}`);
+                    resolve(true);
+                }, { onlyOnce: true });
+            });
+        }
+
+        // Manejar cambios en el estado del juego
+        function handleGameStateChange(snapshot) {
+            const gameData = snapshot.val();
+            if (!gameData) return;
+
+            console.log('Estado del juego actualizado:', gameData);
+
+            switch (gameData.gameState) {
+                case 'game_started':
+                    startGameFromTeacher();
+                    break;
+                case 'question_started':
+                    showQuestionFromTeacher(gameData.question, gameData.questionIndex);
+                    break;
+                case 'question_ended':
+                    endQuestionFromTeacher(gameData.correctAnswer, gameData.explanation);
+                    break;
+                case 'next_question':
+                    prepareNextQuestion(gameData.question, gameData.questionIndex);
+                    break;
+                case 'game_finished':
+                    showFinalResultsFromTeacher();
+                    break;
+            }
+        }
+
+        // Enviar respuesta a Firebase
+        function sendAnswerToFirebase(answer, timeUsed) {
+            if (!database || !studentId) return;
+
+            const answerRef = ref(database, `rooms/${currentRoom}/students/${studentId}`);
+            set(answerRef, {
+                name: studentName,
+                avatar: studentAvatar,
+                joinedAt: serverTimestamp(),
+                connected: true,
+                currentAnswer: answer,
+                answerTime: timeUsed,
+                totalScore: myScore
+            });
+
+            console.log(`📤 Respuesta enviada: ${answer}, tiempo: ${timeUsed}ms`);
+        }
+
+        // Funciones principales
+        window.joinRoom = async function() {
+            const name = document.getElementById('studentName').value.trim();
+            const roomCode = document.getElementById('roomCode').value.trim().toUpperCase();
+
+            if (!name) {
+                alert('❌ Por favor ingresa tu nombre');
+                return;
+            }
+
+            if (!roomCode || roomCode.length !== 6) {
+                alert('❌ Por favor ingresa un código de sala válido (6 dígitos)');
+                return;
+            }
+
+            studentName = name;
+            studentAvatar = name.charAt(0).toUpperCase();
+            currentRoom = roomCode;
+
+            // Inicializar Firebase
+            const firebaseReady = initializeFirebase();
+            
+            if (firebaseReady) {
+                // Intentar unirse a la sala en Firebase
+                const joined = await joinRoomInFirebase();
+                
+                if (joined) {
+                    // Mostrar información del estudiante
+                    document.getElementById('myName').textContent = studentName;
+                    document.getElementById('myAvatar').textContent = studentAvatar;
+                    document.getElementById('currentRoomCode').textContent = roomCode;
+                    document.getElementById('studentHeader').classList.remove('hidden');
+
+                    // Cambiar a sala de espera
+                    showWaitingRoom();
+                } else {
+                    currentRoom = null;
+                }
+            } else {
+                // Modo sin Firebase
+                alert('⚠️ Modo local activo\n\nPara unirse a salas reales, configura Firebase según el README.md');
+                
+                // Mostrar información del estudiante
+                document.getElementById('myName').textContent = studentName;
+                document.getElementById('myAvatar').textContent = studentAvatar;
+                document.getElementById('currentRoomCode').textContent = roomCode;
+                document.getElementById('studentHeader').classList.remove('hidden');
+
+                showWaitingRoom();
+            }
+        };
+
+        function showWaitingRoom() {
+            document.getElementById('joinScreen').classList.add('hidden');
+            document.getElementById('waitingRoom').classList.remove('hidden');
+            gameState = 'waiting';
+
+            // Mostrar conteo inicial
+            document.getElementById('participantCount').textContent = '1';
+            
+            // En una implementación real con Firebase, aquí escucharíamos los cambios
+            // de la base de datos para actualizar el conteo de participantes
+            console.log(`Estudiante esperando en sala ${currentRoom}`);
+        }
+
+        function startGame() {
+            document.getElementById('waitingRoom').classList.add('hidden');
+            document.getElementById('questionScreen').classList.remove('hidden');
+            document.getElementById('myStatus').innerHTML = '🎮 Jugando';
+            document.getElementById('myStatus').className = 'status-badge status-playing';
+            
+            gameState = 'question';
+            showQuestion(1);
+        }
+
+        function showQuestion(questionNum) {
+            // Simular preguntas del cuestionario
+            const questions = [
+                {
+                    id: 1,
+                    question: "¿Cuál es la forma correcta de declarar una variable en JavaScript?",
+                    options: [
+                        "variable miVariable = 'hola';",
+                        "var miVariable = 'hola';",
+                        "declare miVariable = 'hola';",
+                        "set miVariable = 'hola';"
+                    ],
+                    correct: 1,
+                    explanation: "La palabra clave 'var' es una de las formas correctas de declarar variables en JavaScript, junto con 'let' y 'const'.",
+                    timeLimit: 20
+                },
+                {
+                    id: 2,
+                    question: "¿Qué tipo de datos NO existe en JavaScript?",
+                    options: [
+                        "String",
+                        "Boolean",
+                        "Integer",
+                        "Undefined"
+                    ],
+                    correct: 2,
+                    explanation: "JavaScript no tiene un tipo 'Integer' específico. Los números se manejan como 'Number', que incluye tanto enteros como decimales.",
+                    timeLimit: 25
+                },
+                {
+                    id: 3,
+                    question: "¿Cuál es el resultado de: console.log(typeof null)?",
+                    options: [
+                        "null",
+                        "undefined",
+                        "object",
+                        "boolean"
+                    ],
+                    correct: 2,
+                    explanation: "Esta es una peculiaridad histórica de JavaScript. typeof null devuelve 'object', aunque null no es realmente un objeto.",
+                    timeLimit: 30
+                }
+            ];
+
+            currentQuestion = questions[questionNum - 1];
+            selectedAnswer = null;
+
+            // Actualizar interfaz
+            document.getElementById('questionNumber').textContent = `Pregunta ${questionNum} de ${questions.length}`;
+            document.getElementById('questionText').textContent = currentQuestion.question;
+            
+            // Crear opciones
+            const container = document.getElementById('optionsContainer');
+            container.innerHTML = '';
+            
+            currentQuestion.options.forEach((option, index) => {
+                const button = document.createElement('button');
+                button.className = 'btn-option';
+                button.textContent = `${String.fromCharCode(65 + index)}) ${option}`;
+                button.onclick = () => selectAnswer(index);
+                button.id = `option${index}`;
+                container.appendChild(button);
+            });
+
+            // Iniciar temporizador
+            startQuestionTimer(currentQuestion.timeLimit);
+
+            // Ocultar estado de respuesta
+            document.getElementById('answerStatus').classList.add('hidden');
+        }
+
+        function selectAnswer(answerIndex) {
+            if (selectedAnswer !== null) return; // Ya respondió
+
+            selectedAnswer = answerIndex;
+            const timeUsed = Date.now() - questionStartTime;
+            
+            // Enviar respuesta a Firebase
+            sendAnswerToFirebase(answerIndex, timeUsed);
+            
+            // Marcar opción seleccionada
+            document.querySelectorAll('.btn-option').forEach((btn, index) => {
+                if (index === answerIndex) {
+                    btn.classList.add('selected');
+                }
+                btn.style.pointerEvents = 'none'; // Deshabilitar otras opciones
+            });
+
+            // Mostrar mensaje de respuesta enviada
+            document.getElementById('answerMessage').textContent = '✅ Respuesta enviada';
+            document.getElementById('answerStatus').classList.remove('hidden');
+
+            // Detener temporizador
+            clearInterval(questionTimer);
+            document.getElementById('questionTimer').style.color = '#6b7280';
+        }
+
+        function startQuestionTimer(duration) {
+            let timeLeft = duration;
+            document.getElementById('timeLeft').textContent = timeLeft;
+            
+            const timerElement = document.getElementById('questionTimer');
+            timerElement.className = 'timer safe';
+
+            questionTimer = setInterval(() => {
+                timeLeft--;
+                document.getElementById('timeLeft').textContent = timeLeft;
+
+                // Cambiar colores según el tiempo
+                if (timeLeft <= 5) {
+                    timerElement.className = 'timer';
+                } else if (timeLeft <= 10) {
+                    timerElement.className = 'timer warning';
+                }
+
+                if (timeLeft <= 0) {
+                    clearInterval(questionTimer);
+                    endQuestion();
+                }
+            }, 1000);
+        }
+
+        function endQuestion() {
+            // Mostrar respuesta correcta
+            document.querySelectorAll('.btn-option').forEach((btn, index) => {
+                btn.style.pointerEvents = 'none';
+                if (index === currentQuestion.correct) {
+                    btn.classList.add('correct');
+                } else if (index === selectedAnswer && index !== currentQuestion.correct) {
+                    btn.classList.add('incorrect');
+                }
+            });
+
+            // Si no respondió
+            if (selectedAnswer === null) {
+                document.getElementById('answerMessage').textContent = '⏰ Tiempo agotado';
+                document.getElementById('answerMessage').style.color = '#ef4444';
+                document.getElementById('answerStatus').classList.remove('hidden');
+            }
+
+            // Mostrar ranking después de 2 segundos
+            setTimeout(() => {
+                showQuestionRanking();
+            }, 2000);
+        }
+
+        function showQuestionRanking() {
+            document.getElementById('questionScreen').classList.add('hidden');
+            document.getElementById('questionRanking').classList.remove('hidden');
+
+            // Calcular puntos
+            let questionPoints = 0;
+            if (selectedAnswer === currentQuestion.correct) {
+                questionPoints = Math.max(100 - (currentQuestion.timeLimit - parseInt(document.getElementById('timeLeft').textContent)) * 2, 20);
+            }
+            myScore += questionPoints;
+
+            // Mostrar explicación
+            document.getElementById('explanationText').textContent = currentQuestion.explanation;
+
+            // Mostrar solo mi ranking por ahora (en implementación real vendría de Firebase)
+            const rankings = [
+                { name: studentName, points: questionPoints, avatar: studentAvatar, isMe: true }
+            ];
+
+            showRanking('questionRankingList', rankings);
+
+            // Continuar al siguiente pregunta después de 5 segundos
+            setTimeout(() => {
+                const currentQuestionNum = parseInt(document.getElementById('questionNumber').textContent.match(/\d+/)[0]);
+                if (currentQuestionNum < 3) {
+                    nextQuestion(currentQuestionNum + 1);
+                } else {
+                    showFinalResults();
+                }
+            }, 5000);
+        }
+
+        function nextQuestion(questionNum) {
+            document.getElementById('questionRanking').classList.add('hidden');
+            document.getElementById('questionScreen').classList.remove('hidden');
+            showQuestion(questionNum);
+        }
+
+        function showFinalResults() {
+            document.getElementById('questionRanking').classList.add('hidden');
+            document.getElementById('finalResults').classList.remove('hidden');
+
+            // Mostrar solo mis resultados por ahora (en implementación real vendría de Firebase)
+            const finalRankings = [
+                { name: studentName, totalPoints: myScore, avatar: studentAvatar, isMe: true }
+            ];
+
+            // Mi posición (por defecto primera cuando solo soy yo)
+            const myPosition = 1;
+            
+            // Mostrar mi posición
+            let positionMessage = '';
+            let emoji = '';
+            positionMessage = `¡Buen trabajo! Completaste el cuestionario`;
+            emoji = '🏅';
+
+            document.getElementById('myPositionText').textContent = positionMessage;
+            document.getElementById('myPointsText').textContent = `${emoji} ${myScore} puntos totales`;
+
+            showRanking('finalRankingList', finalRankings);
+        }
+
+        function showRanking(containerId, rankings) {
+            const container = document.getElementById(containerId);
+            container.innerHTML = '';
+
+            rankings.forEach((student, index) => {
+                const item = document.createElement('div');
+                item.className = `ranking-item ${student.isMe ? 'me' : ''}`;
+
+                let positionClass = '';
+                let emoji = '';
+                if (index === 0) { positionClass = 'gold'; emoji = '🥇'; }
+                else if (index === 1) { positionClass = 'silver'; emoji = '🥈'; }
+                else if (index === 2) { positionClass = 'bronze'; emoji = '🥉'; }
+
+                const pointsText = containerId === 'finalRankingList' ? 
+                    `${student.totalPoints} puntos totales` : 
+                    `${student.points} puntos`;
+
+                item.innerHTML = `
+                    <div class="ranking-position ${positionClass}">${emoji || (index + 1)}</div>
+                    <div class="ranking-avatar">${student.avatar}</div>
+                    <div class="ranking-info">
+                        <div class="ranking-name">${student.name} ${student.isMe ? '(Tú)' : ''}</div>
+                        <div class="ranking-points">${pointsText}</div>
+                    </div>
+                `;
+
+                container.appendChild(item);
+            });
+        }
+
+        function createConfetti() {
+            const colors = ['#2563eb', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6'];
+            
+            for (let i = 0; i < 50; i++) {
+                const confetti = document.createElement('div');
+                confetti.className = 'confetti';
+                confetti.style.left = Math.random() * 100 + 'vw';
+                confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                confetti.style.animationDelay = Math.random() * 3 + 's';
+                confetti.style.animationDuration = (Math.random() * 3 + 2) + 's';
+                
+                document.body.appendChild(confetti);
+                
+                setTimeout(() => {
+                    confetti.remove();
+                }, 5000);
+            }
+        }
+
+        window.goHome = function() {
+            window.location.href = 'index.html';
+        };
+
+        // Permitir Enter en los campos de entrada
+        document.getElementById('studentName').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                document.getElementById('roomCode').focus();
+            }
+        });
+
+        document.getElementById('roomCode').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                joinRoom();
+            }
+        });
+
+        // Auto-mayúsculas para código de sala
+        document.getElementById('roomCode').addEventListener('input', function(e) {
+            e.target.value = e.target.value.toUpperCase();
+        });
+
+        // Funciones para manejar eventos del profesor
+        let questionStartTime = null;
+
+        function startGameFromTeacher() {
+            document.getElementById('waitingRoom').classList.add('hidden');
+            document.getElementById('questionScreen').classList.remove('hidden');
+            document.getElementById('myStatus').innerHTML = '🎮 Jugando';
+            document.getElementById('myStatus').className = 'status-badge status-playing';
+            
+            gameState = 'question';
+            console.log('🎮 Juego iniciado por el profesor');
+        }
+
+        function showQuestionFromTeacher(question, questionIndex) {
+            currentQuestion = question;
+            selectedAnswer = null;
+            questionStartTime = Date.now();
+
+            // Actualizar interfaz
+            document.getElementById('questionNumber').textContent = `Pregunta ${questionIndex + 1} de 3`;
+            document.getElementById('questionText').textContent = currentQuestion.question;
+            
+            // Crear opciones
+            const container = document.getElementById('optionsContainer');
+            container.innerHTML = '';
+            
+            currentQuestion.options.forEach((option, index) => {
+                const button = document.createElement('button');
+                button.className = 'btn-option';
+                button.textContent = `${String.fromCharCode(65 + index)}) ${option}`;
+                button.onclick = () => selectAnswer(index);
+                button.id = `option${index}`;
+                container.appendChild(button);
+            });
+
+            // Iniciar temporizador
+            startQuestionTimer(currentQuestion.timeLimit);
+
+            // Ocultar estado de respuesta
+            document.getElementById('answerStatus').classList.add('hidden');
+            
+            console.log(`📝 Pregunta ${questionIndex + 1} recibida del profesor`);
+        }
+
+        function endQuestionFromTeacher(correctAnswer, explanation) {
+            // Mostrar respuesta correcta
+            document.querySelectorAll('.btn-option').forEach((btn, index) => {
+                btn.style.pointerEvents = 'none';
+                if (index === correctAnswer) {
+                    btn.classList.add('correct');
+                } else if (index === selectedAnswer && index !== correctAnswer) {
+                    btn.classList.add('incorrect');
+                }
+            });
+
+            // Si no respondió
+            if (selectedAnswer === null) {
+                document.getElementById('answerMessage').textContent = '⏰ Tiempo agotado';
+                document.getElementById('answerMessage').style.color = '#ef4444';
+                document.getElementById('answerStatus').classList.remove('hidden');
+            }
+
+            // Calcular puntos
+            let questionPoints = 0;
+            if (selectedAnswer === correctAnswer) {
+                const timeUsed = Date.now() - questionStartTime;
+                questionPoints = Math.max(100 - Math.floor(timeUsed / 100), 20);
+            }
+            myScore += questionPoints;
+
+            // Mostrar ranking después de 2 segundos
+            setTimeout(() => {
+                showQuestionRankingFromTeacher(explanation);
+            }, 2000);
+            
+            console.log(`✅ Pregunta terminada. Puntos obtenidos: ${questionPoints}`);
+        }
+
+        function showQuestionRankingFromTeacher(explanation) {
+            document.getElementById('questionScreen').classList.add('hidden');
+            document.getElementById('questionRanking').classList.remove('hidden');
+
+            // Mostrar explicación
+            document.getElementById('explanationText').textContent = explanation;
+
+            // Mostrar solo mi ranking
+            const rankings = [
+                { name: studentName, points: 0, avatar: studentAvatar, isMe: true }
+            ];
+
+            showRanking('questionRankingList', rankings);
+            
+            console.log('📊 Mostrando ranking de pregunta');
+        }
+
+        function prepareNextQuestion(question, questionIndex) {
+            document.getElementById('questionRanking').classList.add('hidden');
+            document.getElementById('questionScreen').classList.remove('hidden');
+            
+            showQuestionFromTeacher(question, questionIndex);
+            
+            console.log(`➡️ Preparando pregunta ${questionIndex + 1}`);
+        }
+
+        function showFinalResultsFromTeacher() {
+            document.getElementById('questionRanking').classList.add('hidden');
+            document.getElementById('finalResults').classList.remove('hidden');
+
+            // Mostrar mis resultados finales
+            const finalRankings = [
+                { name: studentName, totalPoints: myScore, avatar: studentAvatar, isMe: true }
+            ];
+
+            const positionMessage = `¡Buen trabajo! Completaste el cuestionario`;
+            const emoji = '🏅';
+
+            document.getElementById('myPositionText').textContent = positionMessage;
+            document.getElementById('myPointsText').textContent = `${emoji} ${myScore} puntos totales`;
+
+            showRanking('finalRankingList', finalRankings);
+            
+            console.log(`🏆 Juego terminado. Puntuación final: ${myScore} puntos`);
+        }
+    </script>
+</body>
+</html>
