@@ -686,15 +686,21 @@
         }
 
         window.startQuestion = function() {
-            if (!currentQuiz) return;
+            console.log('🎯 Iniciando pregunta...', { gameState, questionTimer: !!questionTimer });
             
-            // Verificar si ya hay un temporizador corriendo
+            if (!currentQuiz) {
+                alert('❌ No hay cuestionario cargado');
+                return;
+            }
+            
+            // Limpiar cualquier temporizador anterior de forma segura
             if (questionTimer) {
+                console.log('🧹 Limpiando temporizador anterior');
                 clearInterval(questionTimer);
                 questionTimer = null;
             }
             
-            // Verificar que hay estudiantes conectados
+            // Verificar estudiantes conectados
             if (Object.keys(students).length === 0) {
                 alert('⚠️ No hay estudiantes conectados\n\nEspera a que se conecten estudiantes antes de iniciar la pregunta.');
                 return;
@@ -703,64 +709,62 @@
             const question = currentQuiz.questions[currentQuestionIndex];
             questionStartTime = Date.now();
             studentAnswers = {};
+            
+            // Cambiar estado DESPUÉS de las verificaciones
             gameState = 'question';
             
-            // Cambiar controles inmediatamente
+            // Cambiar interfaz inmediatamente
             document.getElementById('startQuestionBtn').classList.add('hidden');
             document.getElementById('timer').style.color = '#ef4444';
             
-            // Notificar inicio de pregunta a estudiantes
+            console.log(`⏱️ Iniciando temporizador de ${question.timeLimit} segundos`);
+            
+            // Notificar a estudiantes
             updateGameState('question_started', {
                 question: question,
                 questionIndex: currentQuestionIndex,
                 startTime: questionStartTime
             });
             
-            // Iniciar temporizador con protección contra interferencias
+            // Iniciar temporizador simple y robusto
             let timeLeft = question.timeLimit;
             document.getElementById('timer').textContent = timeLeft;
             
             questionTimer = setInterval(() => {
-                // Verificar que el temporizador sigue siendo válido
-                if (gameState !== 'question') {
-                    clearInterval(questionTimer);
-                    questionTimer = null;
-                    return;
-                }
-                
                 timeLeft--;
                 document.getElementById('timer').textContent = timeLeft;
                 
+                console.log(`⏰ Tiempo restante: ${timeLeft}s`);
+                
                 if (timeLeft <= 0) {
+                    console.log('⏰ Tiempo agotado - Terminando pregunta');
                     endQuestion();
                 }
             }, 1000);
             
-            console.log(`⏱️ Pregunta ${currentQuestionIndex + 1} iniciada - ${question.timeLimit}s`);
+            console.log(`✅ Pregunta ${currentQuestionIndex + 1} iniciada correctamente`);
         };
 
         function endQuestion() {
-            // Limpiar temporizador completamente
+            console.log('🛑 Terminando pregunta...');
+            
+            // Limpiar temporizador de forma definitiva
             if (questionTimer) {
                 clearInterval(questionTimer);
                 questionTimer = null;
+                console.log('🧹 Temporizador limpiado');
             }
             
+            // Cambiar estado
             gameState = 'results';
-            console.log(`⏰ Pregunta ${currentQuestionIndex + 1} terminada - Tiempo agotado`);
             
-            // Restablecer color del timer
+            // Restablecer interfaz
             document.getElementById('timer').style.color = '#6b7280';
+            document.getElementById('timer').textContent = '⏹️';
             
-            // Permitir actualizaciones de interfaz nuevamente
-            setTimeout(() => {
-                // Actualizar lista de estudiantes después de terminar pregunta
-                if (students && Object.keys(students).length > 0) {
-                    updateStudentsList(students);
-                }
-            }, 100);
+            console.log(`✅ Pregunta ${currentQuestionIndex + 1} terminada correctamente`);
             
-            // Notificar fin de pregunta a estudiantes
+            // Notificar a estudiantes
             updateGameState('question_ended', {
                 correctAnswer: currentQuiz.questions[currentQuestionIndex].correct,
                 explanation: currentQuiz.questions[currentQuestionIndex].explanation
@@ -939,15 +943,19 @@
                 return;
             }
             
-            gameState = 'playing';
+            // NO cambiar gameState aquí, se cambia en startQuestion
+            console.log('🎯 Cuestionario habilitado para iniciar');
             
-            // Notificar a estudiantes via Firebase
-            updateGameState('game_started', {
-                currentQuestion: currentQuiz.questions[0]
+            // Notificar a estudiantes que el juego está listo
+            updateGameState('game_ready', {
+                message: 'El profesor está listo para comenzar'
             });
             
-            alert(`🎯 ¡Cuestionario iniciado!\n\n${Object.keys(students).length} estudiantes verán la primera pregunta.`);
+            // Solo ocultar el botón de comenzar
             document.getElementById('gameControls').classList.add('hidden');
+            
+            // Mostrar mensaje al profesor
+            alert(`🎯 ¡Listo para comenzar!\n\n${Object.keys(students).length} estudiantes están esperando.\n\nHaz clic en "Iniciar Pregunta" para comenzar.`);
         };
 
         window.restartGame = function() {
